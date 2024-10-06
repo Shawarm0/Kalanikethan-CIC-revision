@@ -63,12 +63,15 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Room dependencies
+    implementation("androidx.paging:paging-compose:3.2.0")
+
+    implementation("androidx.paging:paging-runtime-ktx:3.1.0")    // Room dependencies
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation(libs.androidx.runtime.livedata)
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-rxjava3:2.6.1")
+    implementation("androidx.room:room-paging:2.6.1")
     // Optional - for RxJava or Kotlin Coroutines support
 
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")

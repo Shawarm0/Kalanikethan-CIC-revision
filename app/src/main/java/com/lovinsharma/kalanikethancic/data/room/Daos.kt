@@ -1,5 +1,6 @@
 package com.lovinsharma.kalanikethancic.data.room
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -7,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
+import com.lovinsharma.kalanikethancic.data.room.models.Event
 import com.lovinsharma.kalanikethancic.data.room.models.Family
 import com.lovinsharma.kalanikethancic.data.room.models.Parents
 import com.lovinsharma.kalanikethancic.data.room.models.Students
@@ -31,6 +33,23 @@ interface FamilyDao{
 }
 
 @Dao
+interface EventDao {
+
+
+    @Query("SELECT * FROM event WHERE student_ID = :studentId AND is_Open = 1")
+    suspend fun findOpenEventByStudentId(studentId: Int): Event?
+
+    @Upsert
+    suspend fun insert(event: Event)
+
+    @Query("SELECT * FROM event WHERE is_absent = 0")
+    fun history():Flow<List<Event>>
+
+
+}
+
+
+@Dao
 interface StudentDao{
     @Upsert
     suspend fun insert(students: Students)
@@ -45,6 +64,11 @@ interface StudentDao{
     fun getAllStudents():Flow<List<Students>>
 
 
+    @Query("SELECT * FROM students_table WHERE signed_in = 0")
+    fun getPagedStudents(): PagingSource<Int, Students>
+
+
+
     @Query("SELECT * FROM students_table WHERE signed_in = 1")
     fun getSignedInStudents(): Flow<List<Students>> // Students who are signed in
 
@@ -57,7 +81,7 @@ interface StudentDao{
     suspend fun updateSignInStatus(studentID: Int, status: Boolean) // Update sign-in status
 
     // Modify the query to use the LIKE operator for dynamic search
-    @Query("SELECT * FROM students_table WHERE student_name LIKE '%' || :studentName || '%'")
+    @Query("SELECT * FROM students_table WHERE student_name LIKE '%' || :studentName || '%' AND signed_in == 0")
     fun searchStudentsByName(studentName: String): Flow<List<Students>>
 }
 
@@ -68,6 +92,12 @@ interface ParentsDao{
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(parents: Parents)
+
+    @Query("SELECT * FROM parents_table WHERE family_ID = :familyId")
+    suspend fun getParentsByFamilyId(familyId: Int): List<Parents>
+
+    @Query("SELECT * FROM parents_table")
+    fun getAllParents():Flow<List<Parents>>
 
     @Delete
     suspend fun delete(parents: Parents)

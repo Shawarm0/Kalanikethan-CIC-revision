@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.lovinsharma.kalanikethancic.data.room.converters.DateConverter
+import com.lovinsharma.kalanikethancic.data.room.models.Event
 import com.lovinsharma.kalanikethancic.data.room.models.Family
 import com.lovinsharma.kalanikethancic.data.room.models.Parents
 import com.lovinsharma.kalanikethancic.data.room.models.Students
@@ -14,11 +15,12 @@ import java.util.Date
 
 
 @TypeConverters(value = [DateConverter::class])
-@Database(entities = [Family::class, Students::class, Parents::class], version = 1)
+@Database(entities = [Family::class, Students::class, Parents::class, Event::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun familyDao(): FamilyDao
     abstract fun studentDao(): StudentDao
     abstract fun parentsDao(): ParentsDao
+    abstract fun eventDao(): EventDao
 
     companion object {
         @Volatile

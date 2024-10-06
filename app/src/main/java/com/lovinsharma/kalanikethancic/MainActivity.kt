@@ -1,11 +1,13 @@
 package com.lovinsharma.kalanikethancic
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
 
 
 import com.lovinsharma.kalanikethancic.ui.theme.KalanikethanCICTheme
@@ -50,6 +53,7 @@ import com.lovinsharma.kalanikethancic.Screens.SignInScreen
 import com.lovinsharma.kalanikethancic.Screens.AddScreen
 import com.lovinsharma.kalanikethancic.Screens.WhoInScreen
 import com.lovinsharma.kalanikethancic.Screens.HistoryScreen
+import com.lovinsharma.kalanikethancic.Screens.HomeScreen
 import com.lovinsharma.kalanikethancic.Screens.PaymentsScreen
 import com.lovinsharma.kalanikethancic.Viewmodel.MyViewModel
 import com.lovinsharma.kalanikethancic.Viewmodel.MyViewModelFactory
@@ -59,19 +63,31 @@ import com.lovinsharma.kalanikethancic.data.room.AppDatabase
 
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             KalanikethanCICTheme {
-                var selectedScreen by remember { mutableStateOf("signIn") } //Defines home screen and says that the selected screen can change
+                var selectedScreen by remember { mutableStateOf("home") } //Defines home screen and says that the selected screen can change
+
 
                 val database = AppDatabase.getDatabase(applicationContext)
+
+//                val database = Room.databaseBuilder(
+//                    applicationContext,
+//                    AppDatabase::class.java,
+//                    "app_database.db"
+//                )
+//                    .createFromAsset("app_database.db").build()
+
+
 
                 val familyDao = database.familyDao()
                 val studentDao = database.studentDao()
                 val parentsDao = database.parentsDao()
-                val repository = Repository(familyDao, studentDao, parentsDao)
+                val eventDao = database.eventDao()
+                val repository = Repository(familyDao, studentDao, parentsDao, eventDao)
                 val viewModelFactory = MyViewModelFactory(repository)
                 val myViewModel = ViewModelProvider(this, viewModelFactory)[MyViewModel::class.java]
 
@@ -97,10 +113,11 @@ class MainActivity : ComponentActivity() {
 
 
                             when (selectedScreen) {
-                                "signIn" -> SignInScreen()
+                                "home" -> HomeScreen()
+                                "signIn" -> SignInScreen(viewModel = myViewModel)
                                 "add" -> AddScreen(viewModel = myViewModel)
-                                "whoin" -> WhoInScreen()
-                                "history" -> HistoryScreen()
+                                "whoin" -> WhoInScreen(viewModel = myViewModel)
+                                "history" -> HistoryScreen(viewModel = myViewModel)
                                 "payments" -> PaymentsScreen()
                             }
                         }
@@ -134,7 +151,7 @@ fun Appbar(
     modifier: Modifier = Modifier,
     onScreenSelected: (String) -> Unit // Add this parameter
 ) {
-    var selectedScreen by remember { mutableStateOf("screen1") } // Track selected screen
+    var selectedScreen by remember { mutableStateOf("screen0") } // Track selected screen
 
     Surface(
         modifier = modifier
@@ -154,6 +171,18 @@ fun Appbar(
                 modifier = Modifier.size(100.dp)
             )
             Spacer(modifier = Modifier.height(10.dp))
+
+
+            // Inside Appbar composable
+            AppBarButton(
+                iconResId = R.drawable.home,
+                text = " Home",
+                isSelected = selectedScreen == "screen0",
+                onClick = {
+                    selectedScreen = "screen0"
+                    onScreenSelected("home")
+                }
+            )
 
             // Inside Appbar composable
             AppBarButton(
